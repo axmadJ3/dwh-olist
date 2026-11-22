@@ -1,13 +1,3 @@
-DROP FOREIGN TABLE IF EXISTS raw.olist_customers_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.olist_orders_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.olist_sellers_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.olist_products_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.product_category_name_translation;
-DROP FOREIGN TABLE IF EXISTS raw.olist_order_reviews_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.olist_geolocation_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.olist_order_items_dataset;
-DROP FOREIGN TABLE IF EXISTS raw.olist_order_payments_dataset;
-
 CREATE FOREIGN TABLE raw.olist_customers_dataset (
     customer_id text,
     customer_unique_id text,

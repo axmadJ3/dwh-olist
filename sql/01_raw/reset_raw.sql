@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS raw.customers;
+DROP TABLE IF EXISTS raw.orders;
+DROP TABLE IF EXISTS raw.sellers;
+DROP TABLE IF EXISTS raw.products;
+DROP TABLE IF EXISTS raw.product_category_name;
+DROP TABLE IF EXISTS raw.order_reviews;
+DROP TABLE IF EXISTS raw.geolocation;
+DROP TABLE IF EXISTS raw.order_items;
+DROP TABLE IF EXISTS raw.order_payments;
