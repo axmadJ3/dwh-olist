@@ -19,6 +19,8 @@ BEGIN
     CALL etl.load_raw_product_category_name(p_batch, v_run_id);
     CALL etl.load_raw_geolocation(p_batch, v_run_id);
 
+    CALL etl.load_stg_customers(p_batch, v_run_id);
+
     SELECT count(*) INTO v_failed
       FROM audit.run_step
      WHERE run_id = v_run_id AND status <> 'success';
