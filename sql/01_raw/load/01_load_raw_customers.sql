@@ -37,7 +37,7 @@ BEGIN
         TRUNCATE raw.customers;
 
         INSERT INTO raw.customers (
-            customer,
+            customer_id,
             customer_unique_id,
             customer_zip_code_prefix,
             customer_city, 
@@ -46,7 +46,7 @@ BEGIN
             loaded_at, 
             source_name)
         SELECT
-            customer, 
+            customer_id, 
             customer_unique_id, 
             customer_zip_code_prefix,
             customer_city, 
