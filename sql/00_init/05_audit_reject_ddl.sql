@@ -15,5 +15,3 @@ CREATE TABLE IF NOT EXISTS audit.reject (
     source_row jsonb NOT NULL,
     rejected_at  timestamptz NOT NULL
 );
-
-CREATE INDEX IF NOT EXISTS ix_reject_step_id ON audit.reject (step_id);
