@@ -49,9 +49,9 @@ BEGIN
                     AS product_id,
                 NULLIF(trim(r.product_category_name), '')
                     AS product_category_name,
-                NULLIF(trim(r.product_name_length), '')
+                NULLIF(trim(r.product_name_lenght), '')
                     AS product_name_length,
-                NULLIF(trim(r.product_description_length), '')
+                NULLIF(trim(r.product_description_lenght), '')
                     AS product_description_length,
                 NULLIF(trim(r.product_photos_qty), '')
                     AS product_photos_qty,
