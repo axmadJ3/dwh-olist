@@ -20,6 +20,13 @@ BEGIN
     CALL etl.load_raw_geolocation(p_batch, v_run_id);
 
     CALL etl.load_stg_customers(p_batch, v_run_id);
+    CALL etl.load_stg_orders(p_batch, v_run_id);
+    CALL etl.load_stg_order_items(p_batch, v_run_id);
+    CALL etl.load_stg_order_payments(p_batch, v_run_id);
+    CALL etl.load_stg_order_reviews(p_batch, v_run_id);
+    CALL etl.load_stg_products(p_batch, v_run_id);
+    CALL etl.load_stg_sellers(p_batch, v_run_id);
+    CALL etl.load_stg_product_category_name(p_batch, v_run_id);
 
     SELECT count(*) INTO v_failed
       FROM audit.run_step
