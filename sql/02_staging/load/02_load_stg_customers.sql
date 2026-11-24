@@ -35,11 +35,16 @@ BEGIN
             SELECT
                 r.load_id AS raw_load_id,
                 r.source_name,
-                NULLIF(lower(trim(r.customer_id)), '') AS customer_id,
-                NULLIF(lower(trim(r.customer_unique_id)), '') AS customer_unique_id,
-                NULLIF(trim(r.customer_zip_code_prefix), '') AS customer_zip_code_prefix,
-                NULLIF(trim(r.customer_city), '') AS customer_city,
-                NULLIF(upper(trim(r.customer_state)), '') AS customer_state,
+                NULLIF(lower(trim(r.customer_id)), '')
+                    AS customer_id,
+                NULLIF(lower(trim(r.customer_unique_id)), '')
+                    AS customer_unique_id,
+                NULLIF(trim(r.customer_zip_code_prefix), '')
+                    AS customer_zip_code_prefix,
+                NULLIF(trim(r.customer_city), '')
+                    AS customer_city,
+                NULLIF(upper(trim(r.customer_state)), '')
+                    AS customer_state,
                 to_jsonb(r) AS source_row
             FROM raw.customers r
         )
@@ -69,7 +74,7 @@ BEGIN
             v_step_id, 
             'customers', 
             t.rule_code,
-            t.source_row ->> 'customer_id', 
+            t.source_row ->> 'customer_id',
             t.source_row, 
             v_loaded_at
         FROM tmp_customers t
