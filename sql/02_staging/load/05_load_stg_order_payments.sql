@@ -35,9 +35,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.order_payments;
+        PERFORM etl.assert_prev_stage('load_raw', 'order_payments', p_batch);
+        
+        SELECT count(*) INTO v_read FROM raw.order_payments;
 
         CREATE TEMPORARY TABLE tmp_order_payments
         ON COMMIT DROP AS
@@ -131,8 +131,6 @@ BEGIN
             payment_type,
             payment_installments,
             payment_value,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -143,8 +141,6 @@ BEGIN
             t.payment_type,
             t.payment_installments::smallint,
             t.payment_value::numeric(10,2),
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(

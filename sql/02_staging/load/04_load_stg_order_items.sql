@@ -35,9 +35,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.order_items;
+        PERFORM etl.assert_prev_stage('load_raw', 'order_items', p_batch);
+
+        SELECT count(*) INTO v_read FROM raw.order_items;
 
         CREATE TEMPORARY TABLE tmp_order_items
         ON COMMIT DROP AS
@@ -138,8 +138,6 @@ BEGIN
             shipping_limit_date,
             price,
             freight_value,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -152,8 +150,6 @@ BEGIN
             t.shipping_limit_date::timestamp,
             t.price::numeric(10,2),
             t.freight_value::numeric(10,2),
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(

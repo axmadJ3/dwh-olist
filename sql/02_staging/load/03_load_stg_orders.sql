@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE PROCEDURE etl.load_stg_orders(
     p_batch text,
     p_run_id int DEFAULT NULL
@@ -35,9 +34,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.orders;
+        PERFORM etl.assert_prev_stage( 'load_raw', 'orders', p_batch);
+
+        SELECT count(*) INTO v_read FROM raw.orders;
 
         CREATE TEMPORARY TABLE tmp_orders
         ON COMMIT DROP AS
@@ -143,8 +142,6 @@ BEGIN
             order_delivered_carrier_date,
             order_delivered_customer_date,
             order_estimated_delivery_date,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -158,8 +155,6 @@ BEGIN
             t.order_delivered_carrier_date::timestamp,
             t.order_delivered_customer_date::timestamp,
             t.order_estimated_delivery_date::timestamp,
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(

@@ -33,9 +33,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.sellers;
+        PERFORM etl.assert_prev_stage('load_raw', 'sellers', p_batch);
+
+        SELECT count(*) INTO v_read FROM raw.sellers;
 
         CREATE TEMPORARY TABLE tmp_sellers
         ON COMMIT DROP AS
@@ -65,6 +65,7 @@ BEGIN
                 WHEN seller_zip_code_prefix IS NULL
                     OR seller_zip_code_prefix !~ '^[0-9]{5}$'
                     THEN 'SELL_ZIP_FORMAT'
+                WHEN seller_city IS NULL THEN 'SELL_CITY_EMPTY'
                 WHEN seller_state IS NULL
                     OR seller_state !~ '^[A-Z]{2}$'
                     THEN 'SELL_STATE_FORMAT'
@@ -101,8 +102,6 @@ BEGIN
             seller_zip_code_prefix,
             seller_city,
             seller_state,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -112,8 +111,6 @@ BEGIN
             t.seller_zip_code_prefix::char(5),
             t.seller_city,
             t.seller_state::char(2),
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(

@@ -41,9 +41,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.order_reviews;
+        PERFORM etl.assert_prev_stage('load_raw', 'order_reviews', p_batch);
+
+        SELECT count(*) INTO v_read FROM raw.order_reviews;
 
         CREATE TEMP TABLE tmp_order_reviews
         ON COMMIT DROP
@@ -130,8 +130,6 @@ BEGIN
             review_comment_message,
             review_creation_date,
             review_answer_timestamp,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -144,8 +142,6 @@ BEGIN
             t.review_comment_message,
             t.review_creation_date::timestamp,
             t.review_answer_timestamp::timestamp,
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(

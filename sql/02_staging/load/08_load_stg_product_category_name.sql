@@ -33,9 +33,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.product_category_name;
+        PERFORM etl.assert_prev_stage('load_raw', 'product_category_name', p_batch);
+
+        SELECT count(*) INTO v_read FROM raw.product_category_name;
 
         CREATE TEMPORARY TABLE tmp_product_category_name
         ON COMMIT DROP AS
@@ -90,8 +90,6 @@ BEGIN
         INSERT INTO staging.product_category_name (
             product_category_name,
             product_category_name_english,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -99,8 +97,6 @@ BEGIN
         SELECT
             t.product_category_name,
             t.product_category_name_english,
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(

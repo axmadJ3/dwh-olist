@@ -34,9 +34,9 @@ BEGIN
     COMMIT;
 
     BEGIN
-        SELECT count(*)
-        INTO v_read
-        FROM raw.products;
+        PERFORM etl.assert_prev_stage('load_raw', 'products', p_batch);
+
+        SELECT count(*) INTO v_read FROM raw.products;
 
         CREATE TEMPORARY TABLE tmp_products
         ON COMMIT DROP AS
@@ -174,8 +174,6 @@ BEGIN
             product_length_cm,
             product_height_cm,
             product_width_cm,
-            raw_load_id,
-            stg_load_id,
             loaded_at,
             source_name,
             row_hash
@@ -190,8 +188,6 @@ BEGIN
             t.product_length_cm::smallint,
             t.product_height_cm::smallint,
             t.product_width_cm::smallint,
-            t.raw_load_id,
-            v_step_id,
             v_loaded_at,
             t.source_name,
             staging.hash_key(
