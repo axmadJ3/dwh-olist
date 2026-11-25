@@ -28,6 +28,15 @@ BEGIN
     CALL etl.load_stg_sellers(p_batch, v_run_id);
     CALL etl.load_stg_product_category_name(p_batch, v_run_id);
 
+    CALL etl.load_ods_customer(p_batch, v_run_id);
+    CALL etl.load_ods_order(p_batch, v_run_id);
+    CALL etl.load_ods_order_item(p_batch, v_run_id);
+    CALL etl.load_ods_order_payment(p_batch, v_run_id);
+    CALL etl.load_ods_product(p_batch, v_run_id);
+    CALL etl.load_ods_seller(p_batch, v_run_id);
+    CALL etl.load_ods_product_category_name(p_batch, v_run_id);
+    CALL etl.load_ods_order_reviews(p_batch, v_run_id);
+
     SELECT count(*) INTO v_failed
       FROM audit.run_step
      WHERE run_id = v_run_id AND status <> 'success';
@@ -44,4 +53,4 @@ BEGIN
 END
 $$;
 
-CALL etl.run_all('batch_001_initial');
+CALL etl.run_all('batch_002');
