@@ -1,15 +1,19 @@
 INSERT INTO audit.reject_rule (rule_code, table_name, column_name, description, action) VALUES
  -- customers
- ('CUST_ID_FORMAT', 'customers', 'customer_id', 'customer_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
+ ('CUST_ID_EMPTY', 'customers', 'customer_id', 'customer_id отсутствует', 'reject'),
+ ('CUST_ID_FORMAT', 'customers', 'customer_id', 'customer_id не состоит из 32 шестнадцатеричных символов', 'reject'),
  ('CUST_UID_FORMAT', 'customers', 'customer_unique_id', 'customer_unique_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
+ ('CUST_ZIP_LPAD', 'customers', 'customer_zip_code_prefix', 'zip из 1-4 цифр дополняется нулями слева до 5',  'fix'),
  ('CUST_ZIP_FORMAT', 'customers', 'customer_zip_code_prefix', 'Почтовый индекс отсутствует или не состоит ровно из 5 цифр', 'reject'),
  ('CUST_CITY_EMPTY', 'customers', 'customer_city', 'customer_city пуст', 'reject'),
  ('CUST_STATE_FORMAT', 'customers', 'customer_state', 'Код штата отсутствует или не состоит из 2 букв', 'reject'),
  ('CUST_ID_DUPLICATE', 'customers', 'customer_id', 'customer_id встречается более одного раза', 'reject'),
 
  -- orders
+ ('ORD_ID_EMPTY', 'orders', 'order_id', 'order_id отсутствует', 'reject'),
  ('ORD_ID_FORMAT', 'orders', 'order_id', 'order_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
- ('ORD_CUST_ID_FORMAT', 'orders', 'customer_id', 'customer_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
+ ('ORD_CUST_ID_EMPTY', 'orders', 'customer_id', 'customer_id отсутствует', 'reject'),
+ ('ORD_CUST_ID_FORMAT', 'orders', 'customer_id', 'customer_id не состоит из 32 шестнадцатеричных символов', 'reject'),
  ('ORD_STATUS_INVALID', 'orders', 'order_status', 'Статус заказа отсутствует или не входит в список допустимых значений', 'reject'),
  ('ORD_PURCHASE_FORMAT', 'orders', 'order_purchase_timestamp', 'Время оформления заказа отсутствует или имеет неверный формат даты и времени', 'reject'),
  ('ORD_APPROVED_FORMAT', 'orders', 'order_approved_at', 'Дата подтверждения заказа указана, но имеет неверный формат даты и времени', 'reject'),
@@ -19,10 +23,14 @@ INSERT INTO audit.reject_rule (rule_code, table_name, column_name, description, 
  ('ORD_ID_DUPLICATE', 'orders', 'order_id', 'order_id встречается более одного раза', 'reject'),
 
  -- order_items
- ('ITEM_ORDER_ID_FORMAT', 'order_items', 'order_id', 'order_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
+ ('ITEM_ORDER_ID_EMPTY', 'order_items', 'order_id', 'order_id отсутствует', 'reject'),
+ ('ITEM_ORDER_ID_FORMAT', 'order_items', 'order_id', 'order_id не состоит из 32 шестнадцатеричных символов', 'reject'),
+ ('ITEM_NO_EMPTY', 'order_items', 'order_item_id', 'order_item_id отсутствует', 'reject'),
  ('ITEM_NO_FORMAT', 'order_items', 'order_item_id', 'order_item_id отсутствует или не является целым числом', 'reject'),
  ('ITEM_NO_RANGE', 'order_items', 'order_item_id', 'order_item_id меньше 1 или не помещается в тип smallint', 'reject'),
+ ('ITEM_PRODUCT_ID_EMPTY', 'order_items', 'product_id', 'product_id отсутствует', 'reject'),
  ('ITEM_PRODUCT_ID_FORMAT', 'order_items', 'product_id', 'product_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
+ ('ITEM_SELLER_ID_EMPTY', 'order_items', 'seller_id', 'seller_id отсутствует', 'reject'),
  ('ITEM_SELLER_ID_FORMAT', 'order_items', 'seller_id', 'seller_id отсутствует или не состоит из 32 шестнадцатеричных символов', 'reject'),
  ('ITEM_SHIPLIM_FORMAT', 'order_items', 'shipping_limit_date', 'Крайний срок отправки отсутствует или имеет неверный формат даты и времени', 'reject'),
  ('ITEM_PRICE_FORMAT', 'order_items', 'price', 'Цена отсутствует или не является числом', 'reject'),

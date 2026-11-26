@@ -1,3 +1,4 @@
+
 CREATE OR REPLACE PROCEDURE etl.load_ods_customer(
     p_batch  text,
     p_run_id int DEFAULT NULL
@@ -9,12 +10,15 @@ DECLARE
     v_run_id int := p_run_id;
     v_own_run boolean := false;
     v_step_id int;
+    v_stg_step int;
     v_loaded_at timestamptz;
+    v_type text := etl.batch_type(p_batch);
     v_read int := 0;
     v_ins int := 0;
     v_upd int := 0;
     v_del int := 0;
     v_active int := 0;
+    v_held int := 0;
     v_error text;
 BEGIN
     IF v_run_id IS NULL THEN
@@ -31,13 +35,16 @@ BEGIN
     COMMIT;
 
     BEGIN
-        PERFORM etl.assert_prev_stage('load_stg', 'customers', p_batch);
+        v_stg_step := etl.assert_prev_stage('load_stg', 'customers', p_batch, v_run_id);
 
-        SELECT count(*) INTO v_read   FROM staging.customers;
-        SELECT count(*) INTO v_active FROM ods.ods_customer WHERE NOT is_deleted;
-        IF v_read = 0 OR v_read < v_active * c_min_ratio THEN
-            RAISE EXCEPTION 'snapshot looks broken: staging has % rows, ods has % active rows',
-                            v_read, v_active;
+        SELECT count(*) INTO v_read FROM staging.customers;
+
+        IF v_type = 'full' THEN
+            SELECT count(*) INTO v_active FROM ods.ods_customer WHERE NOT is_deleted;
+            IF v_read = 0 OR v_read < v_active * c_min_ratio THEN
+                RAISE EXCEPTION
+                    'снимок выглядит сломанным: в промежуточном состоянии есть % строк, в ods — % активных строк', v_read, v_active;
+            END IF;
         END IF;
 
         UPDATE ods.ods_customer oc
@@ -81,18 +88,30 @@ BEGIN
         WHERE NOT EXISTS (SELECT 1 FROM ods.ods_customer oc WHERE oc.customer_id = sc.customer_id);
         GET DIAGNOSTICS v_ins = ROW_COUNT;
 
-        UPDATE ods.ods_customer oc
-            SET is_deleted = true,
-                deleted_at = v_loaded_at,
-                updated_step_id = v_step_id,
-                updated_at = v_loaded_at
-            WHERE NOT oc.is_deleted
-                AND NOT EXISTS (SELECT 1 FROM staging.customers sc WHERE sc.customer_id = oc.customer_id);
-        GET DIAGNOSTICS v_del = ROW_COUNT;
+        IF v_type = 'full' THEN
+            UPDATE ods.ods_customer oc
+                SET is_deleted = true,
+                    deleted_at = v_loaded_at,
+                    updated_step_id = v_step_id,
+                    updated_at = v_loaded_at
+                WHERE NOT oc.is_deleted
+                    AND NOT EXISTS (SELECT 1 FROM staging.customers sc
+                                    WHERE sc.customer_id = oc.customer_id)
+                    AND NOT EXISTS (SELECT 1 FROM audit.reject r
+                                    WHERE r.step_id = v_stg_step
+                                        AND r.business_key = replace(oc.customer_id::text, '-', ''));
+            GET DIAGNOSTICS v_del = ROW_COUNT;
 
-        SELECT count(*) INTO v_active FROM ods.ods_customer WHERE NOT is_deleted;
-        IF v_active <> v_read THEN
-            RAISE EXCEPTION 'invariant violated: ods active=%, staging=%', v_active, v_read;
+            SELECT count(*) INTO v_active FROM ods.ods_customer WHERE NOT is_deleted;
+            SELECT count(*) INTO v_held
+            FROM ods.ods_customer oc
+            WHERE NOT oc.is_deleted
+                AND NOT EXISTS (SELECT 1 FROM staging.customers sc
+                               WHERE sc.customer_id = oc.customer_id);
+            IF v_active <> v_read + v_held THEN
+                RAISE EXCEPTION 
+                    'нарушен инвариант: ods активен=%, staging=%, удерживается из-за quarantine=%', v_active, v_read, v_held;
+            END IF;
         END IF;
 
     EXCEPTION WHEN OTHERS THEN
@@ -119,7 +138,7 @@ BEGIN
     COMMIT;
 
     IF v_error IS NOT NULL AND v_own_run THEN
-        RAISE EXCEPTION 'load_ods_customer failed: %', v_error;
+        RAISE EXCEPTION 'load_ods_customer провален: %', v_error;
     END IF;
 END
 $$;
